@@ -5,6 +5,9 @@
   "description": "A daily puzzle built from a realistic AI-agent transcript: find the hidden prompt-injection payload before the agent acts on it.",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
