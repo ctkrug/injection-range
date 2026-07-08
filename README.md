@@ -10,7 +10,7 @@ Every other prompt-injection game puts you in the attacker's seat: write the cle
 see if it works. That's fun once. But the job most people actually have today — reviewing an
 agent's tool calls before approving them — is the opposite job: you're the defender, watching a
 transcript that's already mid-task, and the payload is already hidden in there somewhere. Injection
-Range is built around *that* seat.
+Range is built around _that_ seat.
 
 Each puzzle is a full agent loop — system prompt, user ask, assistant reasoning, tool calls, tool
 outputs — not a chat bubble. Somewhere in a tool's returned content (a fetched doc, a file read, an

@@ -4,7 +4,7 @@
 
 Prompt-injection games put you in the attacker's seat: write the cleverest jailbreak text, see if
 it slips past a model. That's a fine warm-up, but it's not the job most people actually have
-today. Anyone building or supervising an AI agent spends their time in the *opposite* seat —
+today. Anyone building or supervising an AI agent spends their time in the _opposite_ seat —
 reading a transcript that's already mid-task, where a tool has already returned some content, and
 deciding whether it's safe to let the agent act on it. That reviewing skill — spotting an injected
 instruction buried in a "helpful" file, a fetched webpage, or an API response — has no casual place

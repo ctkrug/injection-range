@@ -16,10 +16,7 @@ export interface TranscriptMessage {
 }
 
 export type InjectionTechnique =
-  | "html-comment"
-  | "invisible-unicode"
-  | "homoglyph"
-  | "split-payload";
+  "html-comment" | "invisible-unicode" | "homoglyph" | "split-payload";
 
 export interface InjectionSpan {
   /** Index into `Transcript.messages` of the message carrying the payload. */

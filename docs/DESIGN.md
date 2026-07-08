@@ -13,16 +13,16 @@ banners, ASCII box-drawing) rather than card-and-icon UI.
 
 ## Tokens
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `--color-bg` | `#0b0f0d` | Page background — near-black with a faint green tint |
-| `--color-surface-1` | `#101613` | Message/panel background |
-| `--color-surface-2` | `#172019` | Borders, raised panel edges |
-| `--color-text` | `#d8f5df` | Primary text |
-| `--color-text-muted` | `#7fa88c` | Role labels, secondary text |
-| `--color-accent` | `#39ff88` | Phosphor green — success, focus, primary actions |
-| `--color-support` | `#ffb454` | Amber — warnings, hints, wrong-selection flash |
-| `--color-danger` | `#ff5470` | Red-pink — leak/alarm states |
+| Token                | Value     | Use                                                  |
+| -------------------- | --------- | ---------------------------------------------------- |
+| `--color-bg`         | `#0b0f0d` | Page background — near-black with a faint green tint |
+| `--color-surface-1`  | `#101613` | Message/panel background                             |
+| `--color-surface-2`  | `#172019` | Borders, raised panel edges                          |
+| `--color-text`       | `#d8f5df` | Primary text                                         |
+| `--color-text-muted` | `#7fa88c` | Role labels, secondary text                          |
+| `--color-accent`     | `#39ff88` | Phosphor green — success, focus, primary actions     |
+| `--color-support`    | `#ffb454` | Amber — warnings, hints, wrong-selection flash       |
+| `--color-danger`     | `#ff5470` | Red-pink — leak/alarm states                         |
 
 - **Type pairing:** `JetBrains Mono` (display — wordmark, headings, banners) + `IBM Plex Mono` (UI
   — body text, transcript content), both with a `ui-monospace, monospace` system fallback stack.

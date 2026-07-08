@@ -6,6 +6,7 @@ Epics and stories for v1. Every story ships with concrete, checkable acceptance 
 ## Epic 1 — Core puzzle loop
 
 ### [ ] Story 1 (wow moment): Read, flag, decide, see the consequence
+
 Render a realistic agent transcript with a hidden prompt-injection payload in a tool output; let
 the player flag the suspicious span and choose to allow or block the agent's next move; show the
 consequence, then let them retry.
@@ -17,6 +18,7 @@ consequence, then let them retry.
   solved.
 
 ### [ ] Story 2: Deterministic daily puzzle
+
 A date-based seed selects today's transcript from the pool so the puzzle changes once per day and
 is identical for every player.
 
@@ -25,6 +27,7 @@ is identical for every player.
   transcript id across the pool.
 
 ### [ ] Story 3: Streak and daily result persistence
+
 Track today's attempt (solved/failed, hints used) in `localStorage`, keyed by puzzle date.
 
 - Reloading the page on the same day preserves whether today's puzzle was already solved.
@@ -34,6 +37,7 @@ Track today's attempt (solved/failed, hints used) in `localStorage`, keyed by pu
 ## Epic 2 — Injection variety engine
 
 ### [ ] Story 4: Four distinct injection techniques
+
 Expand the content pool to cover invisible/zero-width unicode, homoglyph substitution, a nested
 "ignore previous instructions"-style instruction inside fetched content, and a payload split across
 two separate tool outputs.
@@ -43,6 +47,7 @@ two separate tool outputs.
   literally present in its message content (guards against silent authoring drift).
 
 ### [ ] Story 5: Difficulty rotation across the week
+
 Tag each transcript with a difficulty; the daily picker favors easier transcripts earlier in the
 week.
 
@@ -50,6 +55,7 @@ week.
 - A documented Sun–Sat difficulty mapping is covered by a unit test.
 
 ### [ ] Story 6: Optional hint
+
 A single hint per puzzle highlights the message containing the injection (not the exact span) and
 costs the player their "no-hint" badge.
 
@@ -59,6 +65,7 @@ costs the player their "no-hint" badge.
 ## Epic 3 — Presentation and feel
 
 ### [ ] Story 7: Design polish — implement docs/DESIGN.md
+
 Build out the terminal-mono direction end-to-end: tokens, type pairing, CRT scanline texture,
 blinking caret, synthesized SFX for keypress/allow/block/leak/win.
 
@@ -68,6 +75,7 @@ blinking caret, synthesized SFX for keypress/allow/block/leak/win.
   persists across reloads via `localStorage`.
 
 ### [ ] Story 8: Span-picking interaction
+
 Let the player select text in the rendered transcript to flag the exact injected span, with a
 visible selection highlight validated against the authored span.
 
@@ -76,6 +84,7 @@ visible selection highlight validated against the authored span.
 - An incorrect selection shows an inline "not quite" state without ending the round.
 
 ### [ ] Story 9: Win and leak screens
+
 A LEAKED screen explaining what was exposed and why, and a SECURE screen with run stats (time,
 hints used, streak), each with one clear next-action call to action.
 
@@ -85,6 +94,7 @@ hints used, streak), each with one clear next-action call to action.
 ## Epic 4 — Sharing and archive
 
 ### [ ] Story 10: Shareable result string
+
 Generate a compact, spoiler-free summary of the day's attempt (found the injection? blocked in
 time? hint used?) that's copyable to the clipboard.
 
@@ -92,6 +102,7 @@ time? hint used?) that's copyable to the clipboard.
 - The copy button falls back to a manual-select text field when the Clipboard API is unavailable.
 
 ### [ ] Story 11: Archive of past puzzles
+
 A list of previous days' transcripts, excluding today, playable on demand without affecting the
 daily streak.
 
