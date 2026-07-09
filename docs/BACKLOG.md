@@ -83,7 +83,7 @@ visible selection highlight validated against the authored span.
   or smaller than the exact offsets.
 - An incorrect selection shows an inline "not quite" state without ending the round.
 
-### [ ] Story 9: Win and leak screens
+### [x] Story 9: Win and leak screens
 
 A LEAKED screen explaining what was exposed and why, and a SECURE screen with run stats (time,
 hints used, streak), each with one clear next-action call to action.
@@ -93,7 +93,7 @@ hints used, streak), each with one clear next-action call to action.
 
 ## Epic 4 — Sharing and archive
 
-### [ ] Story 10: Shareable result string
+### [x] Story 10: Shareable result string
 
 Generate a compact, spoiler-free summary of the day's attempt (found the injection? blocked in
 time? hint used?) that's copyable to the clipboard.
