@@ -5,7 +5,7 @@ Epics and stories for v1. Every story ships with concrete, checkable acceptance 
 
 ## Epic 1 — Core puzzle loop
 
-### [ ] Story 1 (wow moment): Read, flag, decide, see the consequence
+### [x] Story 1 (wow moment): Read, flag, decide, see the consequence
 
 Render a realistic agent transcript with a hidden prompt-injection payload in a tool output; let
 the player flag the suspicious span and choose to allow or block the agent's next move; show the
@@ -74,7 +74,7 @@ blinking caret, synthesized SFX for keypress/allow/block/leak/win.
 - Allow, Block, and Win each trigger a distinct WebAudio-synthesized sound, and a mute toggle
   persists across reloads via `localStorage`.
 
-### [ ] Story 8: Span-picking interaction
+### [x] Story 8: Span-picking interaction
 
 Let the player select text in the rendered transcript to flag the exact injected span, with a
 visible selection highlight validated against the authored span.
