@@ -5,6 +5,8 @@ const MUTE_STORAGE_KEY = "injection-range:muted";
 export interface SoundEngine {
   playFlagCorrect(): void;
   playFlagWrong(): void;
+  playAllowClick(): void;
+  playBlockClick(): void;
   playOutcome(outcome: Outcome): void;
   isMuted(): boolean;
   toggleMute(): boolean;
@@ -91,6 +93,12 @@ export function createSoundEngine(storage: Storage = window.localStorage): Sound
     },
     playFlagWrong() {
       tone(180, 140, "sawtooth", 0.05);
+    },
+    playAllowClick() {
+      tone(340, 70, "triangle", 0.045);
+    },
+    playBlockClick() {
+      tone(620, 70, "square", 0.045);
     },
     playOutcome(outcome: Outcome) {
       if (outcome === "LEAKED") {
