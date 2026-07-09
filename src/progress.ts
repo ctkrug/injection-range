@@ -80,3 +80,16 @@ export function recordResult(storage: Storage, dateKeyValue: string, result: Dai
     lastSolvedDate: dateKeyValue,
   });
 }
+
+/**
+ * Marks today's hint as used without disturbing the solved flag or streak —
+ * safe to call as soon as the player requests a hint, before the round is
+ * decided.
+ */
+export function markHintUsed(storage: Storage, dateKeyValue: string): void {
+  const existing = getDailyResult(storage, dateKeyValue) ?? { solved: false, hintUsed: false };
+  if (existing.hintUsed) {
+    return;
+  }
+  recordResult(storage, dateKeyValue, { ...existing, hintUsed: true });
+}
