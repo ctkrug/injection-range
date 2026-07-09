@@ -172,10 +172,29 @@ body {
 }
 
 .message {
-  background: var(--color-surface-1);
+  background: var(--color-surface-2);
   border: 1px solid var(--color-surface-2);
+  border-left: 3px solid var(--color-surface-2);
   border-radius: var(--radius);
   padding: var(--space-2);
+}
+
+.message--system {
+  border-left-color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
+.message--user {
+  border-left-color: var(--color-accent);
+}
+
+.message--assistant {
+  border-left-color: var(--color-support);
+}
+
+.message--tool {
+  border-left-color: var(--color-danger);
+  background: var(--color-surface-1);
 }
 
 .message__role {
@@ -192,4 +211,16 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--font-ui);
+  user-select: text;
+}
+
+.message__toolcall {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px dashed var(--color-surface-2);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
