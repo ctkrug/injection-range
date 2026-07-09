@@ -13,7 +13,11 @@ A static, client-side TypeScript app bundled with Vite. No backend, no build-tim
 | `engine.ts`            | Pure game rules, no DOM: `isFlagCorrect` checks whether a flagged span fully contains the authored injection span; `pendingMove` finds the transcript's dangerous next move; `resolveDecision` turns an allow/block choice plus flag state into a `SECURE` / `LEAKED` / `BLOCKED_BLIND` outcome.                                                                                                                                                           |
 | `audio.ts`             | `createSoundEngine(storage?)` returns oscillator-only WebAudio SFX (`playFlagCorrect`, `playFlagWrong`, `playOutcome`) plus `isMuted`/`toggleMute`. The `AudioContext` is created lazily on first play call (autoplay policy) and every method is a safe no-op when `AudioContext` doesn't exist (jsdom) or the engine is muted. Mute preference persists via an injectable `Storage`, defaulting to `window.localStorage`.                                |
 | `app.ts`               | The DOM controller. `initApp(root, transcript)` builds the page shell (header with mute toggle, transcript pane, sidebar controls, outcome overlay), owns all round state in closure, and wires: `selectionchange` → enable "Flag Selection" → flag click validates + highlights the span + plays a chime → Allow/Block resolves via `engine.ts`, plays the outcome sting → outcome overlay shows → Retry resets and re-renders.                           |
-| `main.ts`              | Entrypoint: mounts `initApp` on `#app` with `sampleTranscript`.                                                                                                                                                                                                                                                                                                                                                                                            |
+| `transcript-lint.ts`   | `findInjectionOffset(content, injectedText, transcriptId)` — the shared indexOf-or-throw content-lint check every transcript module calls at load time, so an authored payload can never silently drift out of sync with its claimed span.                                                                                                                                                                                                              |
+| `transcript-invisible-unicode.ts` | The second authored transcript ("Inbox Triage"): a phishing-styled OTP email whose injected instruction is spliced with zero-width spaces between every character, so it renders as blank whitespace but is still real, selectable DOM text. Second pool entry, second injection technique (Story 4 in progress).                                                                                                                            |
+| `pool.ts`              | `transcriptPool` — every authored transcript in one array. Add a transcript by adding it here.                                                                                                                                                                                                                                                                                                                                                            |
+| `daily.ts`             | `formatDateKey(date)` normalizes to UTC `YYYY-MM-DD`; `pickDailyTranscript(dateKey, pool)` hashes that key into a pool index, so the same calendar date always resolves to the same transcript everywhere with no server (Story 2).                                                                                                                                                                                                                     |
+| `main.ts`              | Entrypoint: mounts `initApp` on `#app` with `pickDailyTranscript(formatDateKey(new Date()), transcriptPool)`.                                                                                                                                                                                                                                                                                                                                             |
 | `style.css`            | Terminal-mono design tokens and all styling — see `docs/DESIGN.md` for the direction these implement.                                                                                                                                                                                                                                                                                                                                                      |
 
 ## Data flow
@@ -75,12 +79,13 @@ asset path is relative — required because the site is served from a subpath
 
 ## Not yet built
 
-Everything here is Epic 1's wow moment (Story 1) plus Story 8's span-picking interaction, and a
-first pass at Story 7's SFX (flag correct/wrong, allow/block outcome, mute toggle). Not yet
-implemented: a transcript pool + deterministic daily picker (Story 2), `localStorage` persistence
-for streak/result (Story 3), additional injection techniques (Story 4), difficulty rotation
-(Story 5), hints (Story 6), the rest of Story 7's juice plan (char-by-char typing animation on
-new lines, the matrix-lite falling-glyph win celebration, and splitting the outcome sting into
-distinct allow-click/block-click/leak/win sounds per `docs/DESIGN.md` instead of today's
-two-outcome mapping), run-stats on the SECURE screen and a copyable share string (Story 9/10),
+Everything here is Epic 1's wow moment (Story 1) plus Story 8's span-picking interaction, Story 2's
+transcript pool + deterministic daily picker, and a first pass at Story 7's SFX (flag
+correct/wrong, allow/block outcome, mute toggle). Not yet implemented: `localStorage` persistence
+for streak/result (Story 3), the remaining injection techniques — homoglyph and split-payload —
+plus the content-lint build script (Story 4), difficulty rotation (Story 5), hints (Story 6), the
+rest of Story 7's juice plan (char-by-char typing animation on new lines, the matrix-lite
+falling-glyph win celebration, and splitting the outcome sting into distinct
+allow-click/block-click/leak/win sounds per `docs/DESIGN.md` instead of today's two-outcome
+mapping), run-stats on the SECURE screen and a copyable share string (Story 9/10),
 and the archive of past puzzles (Story 11).
