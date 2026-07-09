@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { initApp } from "../src/app";
 import { sampleTranscript } from "../src/sample-transcript";
 import { fakeStorage } from "./support/fake-storage";
+import { getDailyResult } from "../src/progress";
 
 const { injection } = sampleTranscript;
 
@@ -58,6 +59,14 @@ function overlay(): HTMLElement {
 
 function muteButton(): HTMLButtonElement {
   return root.querySelector<HTMLButtonElement>(".btn--mute")!;
+}
+
+function hintButton(): HTMLButtonElement {
+  return root.querySelector<HTMLButtonElement>(".btn--hint")!;
+}
+
+function noHintBadge(): HTMLElement {
+  return root.querySelector<HTMLElement>(".no-hint-badge")!;
 }
 
 describe("initApp", () => {
@@ -211,6 +220,59 @@ describe("initApp — daily persistence", () => {
     expect(allowButton().disabled).toBe(true);
     expect(blockButton().disabled).toBe(true);
     expect(streakCount()).toBe("1");
+  });
+
+  it("requesting a hint highlights the injected message and disables the hint button", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    hintButton().click();
+
+    const hinted = pane().querySelector(
+      `.message--hinted .message__content[data-message-index="${injection.messageIndex}"]`,
+    );
+    expect(hinted).not.toBeNull();
+    expect(hintButton().disabled).toBe(true);
+    expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: false, hintUsed: true });
+  });
+
+  it("a SECURE solve without using the hint shows the no-hint badge", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    expect(noHintBadge().hidden).toBe(false);
+  });
+
+  it("a SECURE solve after using the hint hides the no-hint badge", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    hintButton().click();
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    expect(noHintBadge().hidden).toBe(true);
+  });
+
+  it("a LEAKED outcome never shows the no-hint badge", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    allowButton().click();
+
+    expect(noHintBadge().hidden).toBe(true);
+  });
+
+  it("reloading after a hint keeps the hint revealed and the button disabled", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    hintButton().click();
+
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+
+    expect(hintButton().disabled).toBe(true);
+    const hinted = pane().querySelector(
+      `.message--hinted .message__content[data-message-index="${injection.messageIndex}"]`,
+    );
+    expect(hinted).not.toBeNull();
   });
 
   it("a new calendar day starts fresh even after yesterday's solve", () => {
