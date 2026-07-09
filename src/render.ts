@@ -18,7 +18,7 @@ export function renderTranscript(container: HTMLElement, transcript: Transcript)
   const log = document.createElement("div");
   log.className = "transcript-log";
 
-  for (const message of transcript.messages) {
+  transcript.messages.forEach((message, messageIndex) => {
     const line = document.createElement("article");
     line.className = `message message--${message.role}`;
     line.dataset.role = message.role;
@@ -28,15 +28,24 @@ export function renderTranscript(container: HTMLElement, transcript: Transcript)
     roleLabel.textContent = message.role;
     line.appendChild(roleLabel);
 
+    // Content lives in its own text node, isolated from the tool-call
+    // summary below, so a player's DOM Selection offset maps 1:1 onto
+    // `message.content` — see selection.ts.
     const body = document.createElement("pre");
     body.className = "message__content";
-    body.textContent = message.toolCall
-      ? `${message.content}\n→ ${message.toolCall.name}(${JSON.stringify(message.toolCall.args)})`
-      : message.content;
+    body.dataset.messageIndex = String(messageIndex);
+    body.textContent = message.content;
     line.appendChild(body);
 
+    if (message.toolCall) {
+      const toolCallLine = document.createElement("div");
+      toolCallLine.className = "message__toolcall";
+      toolCallLine.textContent = `→ ${message.toolCall.name}(${JSON.stringify(message.toolCall.args)})`;
+      line.appendChild(toolCallLine);
+    }
+
     log.appendChild(line);
-  }
+  });
 
   container.appendChild(log);
 }
