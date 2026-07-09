@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getDailyResult, getStreak, previousDateKey, recordResult } from "../src/progress";
+import { getDailyResult, getStreak, markHintUsed, previousDateKey, recordResult } from "../src/progress";
 import { fakeStorage } from "./support/fake-storage";
 
 describe("previousDateKey", () => {
@@ -72,6 +72,28 @@ describe("getStreak", () => {
     recordResult(storage, "2026-07-09", { solved: true, hintUsed: true });
     expect(getStreak(storage)).toBe(2);
     expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: true, hintUsed: true });
+  });
+
+  it("markHintUsed sets the hint flag without recording a solve", () => {
+    const storage = fakeStorage();
+    markHintUsed(storage, "2026-07-09");
+    expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: false, hintUsed: true });
+    expect(getStreak(storage)).toBe(0);
+  });
+
+  it("markHintUsed preserves an already-recorded solve", () => {
+    const storage = fakeStorage();
+    recordResult(storage, "2026-07-09", { solved: true, hintUsed: false });
+    markHintUsed(storage, "2026-07-09");
+    expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: true, hintUsed: true });
+    expect(getStreak(storage)).toBe(1);
+  });
+
+  it("markHintUsed is a no-op once the hint is already marked used", () => {
+    const storage = fakeStorage();
+    markHintUsed(storage, "2026-07-09");
+    markHintUsed(storage, "2026-07-09");
+    expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: false, hintUsed: true });
   });
 
   it("a storage that throws on write does not crash recordResult", () => {
