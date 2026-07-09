@@ -3,11 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Injection Range</title>
+    <title>Injection Range — Spot the prompt injection before your agent does</title>
     <meta
       name="description"
-      content="A daily puzzle built from a realistic AI-agent transcript: find the hidden prompt-injection payload before the agent acts on it."
+      content="A daily browser puzzle for people who review AI-agent transcripts. Find the prompt-injection payload hidden in a tool's output before the agent acts on it."
     />
+    <meta property="og:title" content="Injection Range — Spot the prompt injection before your agent does" />
+    <meta
+      property="og:description"
+      content="A daily browser puzzle: read a realistic AI-agent transcript, find the hidden injected instruction, and decide whether to allow or block the agent's next move."
+    />
+    <meta property="og:type" content="website" />
     <link
       rel="icon"
       type="image/svg+xml"
@@ -22,6 +28,92 @@
   </head>
   <body>
     <div id="app"></div>
+
+    <section class="page-about" aria-label="About Injection Range">
+      <div class="page-about__inner">
+        <h2>What Injection Range is</h2>
+        <p>
+          Injection Range is a daily puzzle for anyone who reviews what an AI agent is about to do.
+          Each round is a full agent session rendered as a terminal transcript: the system prompt,
+          the user's request, the assistant's reasoning, a tool call, and the content that tool
+          returned. Somewhere in that returned content sits an instruction the agent was never
+          supposed to receive, planted by whoever controlled the data the tool read. Your job is to
+          find it, flag it, and then decide whether the agent's proposed next move is safe to allow
+          or needs to be blocked.
+        </p>
+
+        <h2>How to play</h2>
+        <p>
+          Read the transcript top to bottom, the same way you would review a real agent run before
+          approving its actions. When you spot the injected text, select it and click Flag
+          Selection. A correct flag lights up green; a wrong one flashes amber and the round keeps
+          going, so you can keep hunting. Stuck? The Use Hint button highlights the message that
+          contains the payload without giving away the exact span, and it costs you the no-hint
+          badge on the result screen rather than your streak. Then decide the pending move: Allow
+          plays out the payload's intent and ends the run LEAKED, naming exactly what got exposed;
+          Block after a correct flag ends the run SECURE and extends your daily streak.
+        </p>
+
+        <h2>The injection techniques</h2>
+        <p>
+          Every player gets the same puzzle each day, chosen from a growing pool that covers
+          distinct ways an instruction can hide in plain text. One buries the payload in an HTML
+          comment inside a setup doc. One spells it out in zero-width characters that render as
+          blank space between two lines of an email. One swaps Latin letters for Cyrillic
+          lookalikes so the sentence reads normally but slips past a keyword filter. Each technique
+          maps to a real class of prompt-injection attack that agent builders run into, so the
+          practice transfers to the transcripts you review at work.
+        </p>
+
+        <h2>Frequently asked questions</h2>
+        <dl class="faq">
+          <dt>What is prompt injection?</dt>
+          <dd>
+            Prompt injection is when untrusted content that a model reads (a fetched web page, an
+            email, a file, an API response) carries instructions that hijack the model's behavior.
+            When an AI agent has tools that can send data or change state, a successful injection
+            can make it leak secrets or take actions the user never asked for.
+          </dd>
+
+          <dt>Who is this puzzle for?</dt>
+          <dd>
+            Developers building LLM agents, prompt engineers, and security folks who review agent
+            tool calls before approving them. If part of your job is deciding whether an agent's
+            next action is safe, this trains the specific skill of catching a hidden instruction in
+            a transcript.
+          </dd>
+
+          <dt>Do I need an account or an API key?</dt>
+          <dd>
+            No. Injection Range runs entirely in your browser with no login and no backend. Your
+            daily result and streak are stored in your browser's localStorage, and the shareable
+            result summary never includes any transcript content, so it is safe to paste publicly.
+          </dd>
+
+          <dt>Is a new puzzle really the same for everyone?</dt>
+          <dd>
+            Yes. A date-seeded picker deterministically selects one transcript from the pool, so
+            everyone playing on a given day faces the identical payload and next move. Retry lets
+            you replay today's transcript without affecting your recorded result.
+          </dd>
+
+          <dt>Are these based on real attacks?</dt>
+          <dd>
+            The transcripts are authored for the puzzle, but each injection technique (HTML-comment,
+            invisible unicode, homoglyph) mirrors a real, documented prompt-injection method. The
+            endpoints and secrets are fictional stand-ins.
+          </dd>
+        </dl>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <a class="site-footer__link" href="https://github.com/ctkrug/injection-range">View on GitHub</a>
+      <a class="site-footer__link site-footer__portfolio" href="https://apps.charliekrug.com"
+        >More by Charlie Krug &rarr; apps.charliekrug.com</a
+      >
+    </footer>
+
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
