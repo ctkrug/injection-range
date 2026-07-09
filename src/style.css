@@ -166,6 +166,16 @@ body {
   margin: 0;
 }
 
+.mission-brief p.streak-line {
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.streak-count {
+  color: var(--color-accent);
+}
+
 .pending-move {
   font-family: var(--font-ui);
   color: var(--color-support);
