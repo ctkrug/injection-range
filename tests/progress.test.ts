@@ -117,4 +117,15 @@ describe("getStreak", () => {
       recordResult(throwingStorage, "2026-07-09", { solved: true, hintUsed: false }),
     ).not.toThrow();
   });
+
+  it("recovers from hand-corrupted (non-JSON) localStorage instead of crashing", () => {
+    const storage = fakeStorage();
+    storage.setItem("injection-range:results", "{not valid json");
+    storage.setItem("injection-range:streak", "also not json");
+
+    expect(getDailyResult(storage, "2026-07-09")).toBeNull();
+    expect(getStreak(storage)).toBe(0);
+    expect(() => recordResult(storage, "2026-07-09", { solved: true, hintUsed: false })).not.toThrow();
+    expect(getStreak(storage)).toBe(1);
+  });
 });
