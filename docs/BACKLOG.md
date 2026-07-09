@@ -26,7 +26,7 @@ is identical for every player.
 - A spread of different calendar dates (checked in a unit test) yields more than one distinct
   transcript id across the pool.
 
-### [ ] Story 3: Streak and daily result persistence
+### [x] Story 3: Streak and daily result persistence
 
 Track today's attempt (solved/failed, hints used) in `localStorage`, keyed by puzzle date.
 
