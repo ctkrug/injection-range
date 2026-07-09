@@ -125,7 +125,9 @@ describe("getStreak", () => {
 
     expect(getDailyResult(storage, "2026-07-09")).toBeNull();
     expect(getStreak(storage)).toBe(0);
-    expect(() => recordResult(storage, "2026-07-09", { solved: true, hintUsed: false })).not.toThrow();
+    expect(() =>
+      recordResult(storage, "2026-07-09", { solved: true, hintUsed: false }),
+    ).not.toThrow();
     expect(getStreak(storage)).toBe(1);
   });
 });
