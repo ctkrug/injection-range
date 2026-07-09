@@ -163,6 +163,12 @@ body {
   .control-panel {
     position: static;
   }
+
+  /* Keep the primary decision reachable without scrolling back up. */
+  .decision-controls {
+    position: sticky;
+    bottom: var(--space-2);
+  }
 }
 
 .transcript-log {
