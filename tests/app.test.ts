@@ -7,6 +7,7 @@ const { injection } = sampleTranscript;
 let root: HTMLElement;
 
 beforeEach(() => {
+  window.localStorage.clear();
   root = document.createElement("div");
   document.body.appendChild(root);
 });
@@ -52,6 +53,10 @@ function blockButton(): HTMLButtonElement {
 
 function overlay(): HTMLElement {
   return root.querySelector<HTMLElement>(".outcome-overlay")!;
+}
+
+function muteButton(): HTMLButtonElement {
+  return root.querySelector<HTMLButtonElement>(".btn--mute")!;
 }
 
 describe("initApp", () => {
@@ -139,5 +144,26 @@ describe("initApp", () => {
     expect(flagButton().disabled).toBe(true);
     expect(pane().querySelector(".flag-mark--correct")).toBeNull();
     expect(root.querySelector(".flag-feedback")?.textContent).toBe("");
+  });
+
+  it("starts unmuted and toggles the mute button label + aria-pressed on click", () => {
+    initApp(root, sampleTranscript);
+
+    expect(muteButton().textContent).toBe("Sound: On");
+    expect(muteButton().getAttribute("aria-pressed")).toBe("false");
+
+    muteButton().click();
+
+    expect(muteButton().textContent).toBe("Sound: Off");
+    expect(muteButton().getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("persists the mute preference across a fresh initApp call", () => {
+    initApp(root, sampleTranscript);
+    muteButton().click();
+
+    initApp(root, sampleTranscript);
+
+    expect(muteButton().textContent).toBe("Sound: Off");
   });
 });
