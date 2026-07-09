@@ -459,6 +459,11 @@ body {
   .outcome-overlay {
     animation: none;
   }
+
+  .outcome-overlay[data-outcome="SECURE"] .outcome-card,
+  .celebration__glyph {
+    animation: none;
+  }
 }
 
 .outcome-overlay {
@@ -590,6 +595,57 @@ body {
 .outcome-overlay[data-outcome="SECURE"] .outcome-banner {
   color: var(--color-accent);
   text-shadow: 0 0 12px rgba(57, 255, 136, 0.45);
+}
+
+/* Green-flood: the SECURE card briefly floods with phosphor before settling. */
+.outcome-overlay[data-outcome="SECURE"] .outcome-card {
+  animation: secure-flood 520ms ease-out;
+}
+
+@keyframes secure-flood {
+  0% {
+    box-shadow:
+      0 0 40px rgba(0, 0, 0, 0.7),
+      0 0 0 2px var(--color-accent),
+      0 0 90px 30px rgba(57, 255, 136, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Falling 0/1 glyphs (celebrate.ts) — matrix-lite, layered over the overlay. */
+.celebration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.celebration__glyph {
+  position: absolute;
+  top: -8%;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--color-accent);
+  text-shadow: 0 0 8px rgba(57, 255, 136, 0.7);
+  animation-name: glyph-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes glyph-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
 }
 
 .outcome-overlay[data-outcome="LEAKED"] .outcome-banner {

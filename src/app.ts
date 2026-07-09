@@ -8,6 +8,7 @@ import { formatDateKey } from "./daily";
 import { getDailyResult, getStreak, markHintUsed, recordResult } from "./progress";
 import { buildShareSummary } from "./share";
 import { copyToClipboard } from "./clipboard";
+import { spawnCelebration } from "./celebrate";
 
 export interface AppOptions {
   storage?: Storage;
@@ -162,6 +163,9 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     syncNoHintBadge(noHintBadge!, result.outcome, hintUsed);
     overlay!.focus();
     sound.playOutcome(result.outcome);
+    if (result.outcome === "SECURE") {
+      spawnCelebration(overlay!);
+    }
 
     recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed });
     syncStreakDisplay(streakCount!, storage);
@@ -221,6 +225,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     roundStartedAt = now();
     lastShareSummary = null;
     overlay!.hidden = true;
+    overlay!.querySelector(".celebration")?.remove();
     flagFeedback!.textContent = "";
     delete flagFeedback!.dataset.tone;
     flagButton!.disabled = true;
