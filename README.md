@@ -24,20 +24,25 @@ this time you actually spot it before it acts.
 
 ## How it works
 
-- One puzzle per calendar day, picked deterministically so everyone plays the same transcript —
-  no server, no accounts, no backend.
-- Flag the exact span you think is the injection, then choose the agent's next move: allow or
-  block.
-- Guess right and block in time: the run ends "SECURE." Miss it or block the wrong thing: the run
-  ends "LEAKED," and it shows you exactly what got exposed.
-- An archive of past days is playable any time without touching your streak.
+- Read the transcript in the terminal pane: system prompt, user request, the assistant's tool
+  call, and the tool's returned content.
+- Select the text you think is the injected payload and click **Flag Selection**. A correct flag
+  highlights green; a wrong one flashes amber — either way, the round keeps going.
+- Decide the agent's pending next move: **Allow** it or **Block** it.
+  - Allow always plays out the payload's intent — the run ends **LEAKED**, naming exactly what
+    got exposed.
+  - Block after a correct flag ends the run **SECURE**. Block without ever finding the payload
+    still stays safe, but doesn't count as a full solve.
+- **Retry** resets the round so you can read the same transcript again.
 
 ## Planned features
 
-- Daily deterministic puzzle + streak tracking (localStorage, no accounts)
+- Daily deterministic puzzle (date-seeded, same transcript for everyone) + streak tracking in
+  `localStorage` — currently every session plays the same one hand-authored transcript.
 - A pool of hand-authored transcripts spanning multiple injection techniques (invisible unicode,
   homoglyphs, nested "ignore previous instructions" text, split/obfuscated payloads)
 - Optional single hint per puzzle (costs your no-hint badge, not your streak)
+- Synthesized WebAudio sound effects with a persistent mute toggle
 - Spoiler-free shareable result string
 - Archive of past puzzles for untimed practice
 
