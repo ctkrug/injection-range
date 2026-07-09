@@ -5,7 +5,7 @@ import { selectionToFlaggedSpan } from "./selection";
 import { isFlagCorrect, pendingMove, resolveDecision, type Outcome } from "./engine";
 import { createSoundEngine } from "./audio";
 import { formatDateKey } from "./daily";
-import { getDailyResult, getStreak, recordResult } from "./progress";
+import { getDailyResult, getStreak, markHintUsed, recordResult } from "./progress";
 
 export interface AppOptions {
   storage?: Storage;
@@ -44,6 +44,9 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   const retryButton = root.querySelector<HTMLButtonElement>(".btn--retry");
   const muteButton = root.querySelector<HTMLButtonElement>(".btn--mute");
   const streakCount = root.querySelector<HTMLElement>(".streak-count");
+  const hintButton = root.querySelector<HTMLButtonElement>(".btn--hint");
+  const hintFeedback = root.querySelector<HTMLElement>(".hint-feedback");
+  const noHintBadge = root.querySelector<HTMLElement>(".no-hint-badge");
 
   if (
     !transcriptPane ||
@@ -56,7 +59,10 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     !overlayMessage ||
     !retryButton ||
     !muteButton ||
-    !streakCount
+    !streakCount ||
+    !hintButton ||
+    !hintFeedback ||
+    !noHintBadge
   ) {
     throw new Error("app shell is missing an expected control element");
   }
@@ -72,15 +78,24 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   renderTranscript(transcriptPane, transcript);
 
   const todayResult = getDailyResult(storage, puzzleDateKey);
+  let hintUsed = todayResult?.hintUsed ?? false;
+  if (hintUsed) {
+    applyHintReveal(transcriptPane, transcript, true);
+    hintButton.disabled = true;
+    hintFeedback.textContent = "Hint used — check the highlighted message.";
+  }
+
   if (todayResult?.solved) {
     decided = true;
     flagButton.disabled = true;
     allowButton.disabled = true;
     blockButton.disabled = true;
+    hintButton.disabled = true;
     overlayBanner.textContent = OUTCOME_BANNER.SECURE;
     overlayMessage.textContent = "Already solved today's puzzle. Come back tomorrow for a new one.";
     overlay.dataset.outcome = "SECURE";
     overlay.hidden = false;
+    syncNoHintBadge(noHintBadge, "SECURE", hintUsed);
   }
 
   function onSelectionChange(): void {
@@ -97,7 +112,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     }
     flaggedSpan = candidateSpan;
     const correct = isFlagCorrect(transcript, flaggedSpan);
-    applyHighlight(transcriptPane!, transcript, flaggedSpan, correct);
+    applyHighlight(transcriptPane!, transcript, flaggedSpan, correct, hintUsed);
     flagFeedback!.textContent = correct
       ? "Flagged. That reads like the payload."
       : "Flagged — not quite. Keep looking.";
@@ -119,14 +134,27 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     flagButton!.disabled = true;
     allowButton!.disabled = true;
     blockButton!.disabled = true;
+    hintButton!.disabled = true;
     overlayBanner!.textContent = OUTCOME_BANNER[result.outcome];
     overlayMessage!.textContent = result.message;
     overlay!.dataset.outcome = result.outcome;
     overlay!.hidden = false;
+    syncNoHintBadge(noHintBadge!, result.outcome, hintUsed);
     sound.playOutcome(result.outcome);
 
-    recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed: false });
+    recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed });
     syncStreakDisplay(streakCount!, storage);
+  }
+
+  function onHint(): void {
+    if (decided || hintUsed) {
+      return;
+    }
+    hintUsed = true;
+    markHintUsed(storage, puzzleDateKey);
+    applyHintReveal(transcriptPane!, transcript, true);
+    hintButton!.disabled = true;
+    hintFeedback!.textContent = "Hint used — check the highlighted message.";
   }
 
   function onMuteToggle(): void {
@@ -144,6 +172,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     allowButton!.disabled = false;
     blockButton!.disabled = false;
     renderTranscript(transcriptPane!, transcript);
+    applyHintReveal(transcriptPane!, transcript, hintUsed);
   }
 
   document.addEventListener("selectionchange", onSelectionChange);
@@ -152,6 +181,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   blockButton.addEventListener("click", () => onDecision("block"));
   retryButton.addEventListener("click", onRetry);
   muteButton.addEventListener("click", onMuteToggle);
+  hintButton.addEventListener("click", onHint);
 }
 
 function syncMuteButton(button: HTMLButtonElement, muted: boolean): void {
@@ -161,6 +191,21 @@ function syncMuteButton(button: HTMLButtonElement, muted: boolean): void {
 
 function syncStreakDisplay(streakCount: HTMLElement, storage: Storage): void {
   streakCount.textContent = String(getStreak(storage));
+}
+
+/** Highlights the whole message containing the injection, without revealing the exact span. */
+function applyHintReveal(pane: HTMLElement, transcript: Transcript, hinted: boolean): void {
+  if (!hinted) {
+    return;
+  }
+  const target = pane.querySelector<HTMLElement>(
+    `.message__content[data-message-index="${transcript.injection.messageIndex}"]`,
+  );
+  target?.closest<HTMLElement>(".message")?.classList.add("message--hinted");
+}
+
+function syncNoHintBadge(badge: HTMLElement, outcome: Outcome, hintUsed: boolean): void {
+  badge.hidden = !(outcome === "SECURE" && !hintUsed);
 }
 
 function buildShell(transcript: Transcript): DocumentFragment {
@@ -185,6 +230,10 @@ function buildShell(transcript: Transcript): DocumentFragment {
           <button type="button" class="btn btn--flag" disabled>Flag Selection</button>
           <p class="flag-feedback" role="status" aria-live="polite"></p>
         </div>
+        <div class="hint-controls">
+          <button type="button" class="btn btn--hint">Use Hint</button>
+          <p class="hint-feedback" role="status" aria-live="polite"></p>
+        </div>
         <div class="decision-controls">
           <p class="pending-move-label">Pending move</p>
           <p class="pending-move">${escapeHtml(move.label)}</p>
@@ -199,6 +248,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
       <div class="outcome-card">
         <pre class="outcome-banner"></pre>
         <p class="outcome-message"></p>
+        <p class="no-hint-badge" hidden>NO-HINT SOLVE</p>
         <button type="button" class="btn btn--retry">Retry</button>
       </div>
     </div>
@@ -211,8 +261,10 @@ function applyHighlight(
   transcript: Transcript,
   flagged: FlaggedSpan,
   correct: boolean,
+  hinted: boolean,
 ): void {
   renderTranscript(pane, transcript);
+  applyHintReveal(pane, transcript, hinted);
   const target = pane.querySelector<HTMLElement>(
     `.message__content[data-message-index="${flagged.messageIndex}"]`,
   );
