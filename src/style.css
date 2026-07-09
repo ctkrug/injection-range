@@ -384,4 +384,73 @@ body {
   .flag-mark--wrong {
     animation: none;
   }
+
+  .outcome-overlay {
+    animation: none;
+  }
+}
+
+.outcome-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2);
+  background: rgba(2, 4, 3, 0.82);
+  backdrop-filter: blur(2px);
+  animation: overlay-fade-in 200ms ease-out;
+  z-index: 10;
+}
+
+.outcome-overlay[hidden] {
+  display: none;
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.outcome-card {
+  width: min(480px, 100%);
+  text-align: center;
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-surface-2);
+  border-radius: var(--radius);
+  padding: var(--space-4) var(--space-3);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+}
+
+.outcome-banner {
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 2.4vw, 0.95rem);
+  line-height: 1.4;
+  margin: 0 0 var(--space-2);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.outcome-message {
+  color: var(--color-text);
+  margin: 0 0 var(--space-3);
+}
+
+.outcome-overlay[data-outcome="SECURE"] .outcome-banner {
+  color: var(--color-accent);
+  text-shadow: 0 0 12px rgba(57, 255, 136, 0.45);
+}
+
+.outcome-overlay[data-outcome="LEAKED"] .outcome-banner {
+  color: var(--color-danger);
+  text-shadow: 0 0 12px rgba(255, 84, 112, 0.45);
+}
+
+.outcome-overlay[data-outcome="BLOCKED_BLIND"] .outcome-banner {
+  color: var(--color-support);
+  text-shadow: 0 0 12px rgba(255, 180, 84, 0.45);
 }
