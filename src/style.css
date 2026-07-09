@@ -224,3 +224,104 @@ body {
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-surface-2);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 160ms ease-out,
+    background-color 160ms ease-out,
+    border-color 160ms ease-out,
+    box-shadow 160ms ease-out;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--color-text-muted);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-bg),
+    0 0 0 4px var(--color-accent);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn--flag {
+  width: 100%;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn--flag:hover:not(:disabled) {
+  background: rgba(57, 255, 136, 0.12);
+  box-shadow: 0 0 12px rgba(57, 255, 136, 0.25);
+}
+
+.decision-buttons {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.btn--allow {
+  flex: 1;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.btn--allow:hover:not(:disabled) {
+  background: rgba(255, 84, 112, 0.12);
+}
+
+.btn--block {
+  flex: 1;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn--block:hover:not(:disabled) {
+  background: rgba(57, 255, 136, 0.12);
+}
+
+.btn--retry {
+  border-color: var(--color-support);
+  color: var(--color-support);
+  margin-top: var(--space-2);
+}
+
+.btn--retry:hover {
+  background: rgba(255, 180, 84, 0.14);
+}
+
+.flag-feedback {
+  min-height: 1.2em;
+  margin: var(--space-1) 0 0;
+  font-size: 0.9rem;
+}
+
+.flag-feedback[data-tone="correct"] {
+  color: var(--color-accent);
+}
+
+.flag-feedback[data-tone="wrong"] {
+  color: var(--color-support);
+}
