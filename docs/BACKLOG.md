@@ -54,7 +54,7 @@ week.
 - The transcript schema has a required `difficulty` field, validated by the content-lint script.
 - A documented Sun–Sat difficulty mapping is covered by a unit test.
 
-### [ ] Story 6: Optional hint
+### [x] Story 6: Optional hint
 
 A single hint per puzzle highlights the message containing the injection (not the exact span) and
 costs the player their "no-hint" badge.

@@ -17,7 +17,7 @@ A static, client-side TypeScript app bundled with Vite. No backend, no build-tim
 | `transcript-invisible-unicode.ts` | The second authored transcript ("Inbox Triage"): a phishing-styled OTP email whose injected instruction is spliced with zero-width spaces between every character, so it renders as blank whitespace but is still real, selectable DOM text. Second pool entry, second injection technique (Story 4 in progress).                                                                                                                            |
 | `pool.ts`              | `transcriptPool` — every authored transcript in one array. Add a transcript by adding it here.                                                                                                                                                                                                                                                                                                                                                            |
 | `daily.ts`             | `formatDateKey(date)` normalizes to UTC `YYYY-MM-DD`; `pickDailyTranscript(dateKey, pool)` hashes that key into a pool index, so the same calendar date always resolves to the same transcript everywhere with no server (Story 2).                                                                                                                                                                                                                     |
-| `progress.ts`          | `recordResult(storage, dateKey, { solved, hintUsed })` persists today's attempt and updates the streak (consecutive-day solves increment it, a gap resets to 1); `getDailyResult`/`getStreak` read it back. `storage` is always injected (defaults to `window.localStorage` at the `app.ts` call site) so this stays testable without real browser storage (Story 3).                                                                                 |
+| `progress.ts`          | `recordResult(storage, dateKey, { solved, hintUsed })` persists today's attempt and updates the streak (consecutive-day solves increment it, a gap resets to 1); `getDailyResult`/`getStreak` read it back. `markHintUsed` upserts just the hint flag without touching `solved` or the streak, so a hint taken mid-round survives a reload before the round is even decided (Story 6). `storage` is always injected (defaults to `window.localStorage` at the `app.ts` call site) so this stays testable without real browser storage (Story 3).                                                                                 |
 | `main.ts`              | Entrypoint: mounts `initApp` on `#app` with `pickDailyTranscript(formatDateKey(new Date()), transcriptPool)`.                                                                                                                                                                                                                                                                                                                                             |
 | `style.css`            | Terminal-mono design tokens and all styling — see `docs/DESIGN.md` for the direction these implement.                                                                                                                                                                                                                                                                                                                                                      |
 
@@ -81,10 +81,10 @@ asset path is relative — required because the site is served from a subpath
 ## Not yet built
 
 Everything here is Epic 1's wow moment (Story 1), span-picking (Story 8), the daily picker
-(Story 2), streak/result persistence (Story 3), and a first pass at Story 7's SFX (flag
-correct/wrong, allow/block outcome, mute toggle) — Epic 1 is complete. Not yet implemented: the
-remaining injection techniques — homoglyph and split-payload —
-plus the content-lint build script (Story 4), difficulty rotation (Story 5), hints (Story 6), the
+(Story 2), streak/result persistence (Story 3), the optional hint (Story 6), and a first pass at
+Story 7's SFX (flag correct/wrong, allow/block outcome, mute toggle) — Epic 1 is complete. Not yet
+implemented: the remaining injection techniques — homoglyph and split-payload —
+plus the content-lint build script (Story 4), difficulty rotation (Story 5), the
 rest of Story 7's juice plan (char-by-char typing animation on new lines, the matrix-lite
 falling-glyph win celebration, and splitting the outcome sting into distinct
 allow-click/block-click/leak/win sounds per `docs/DESIGN.md` instead of today's two-outcome
