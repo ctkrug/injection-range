@@ -130,4 +130,23 @@ describe("getStreak", () => {
     ).not.toThrow();
     expect(getStreak(storage)).toBe(1);
   });
+
+  // Valid JSON that isn't the expected object shape (a scalar, null, or array)
+  // parses without throwing, so it slips past the try/catch above — assigning a
+  // date key onto it would then crash. Each of these must be treated as absent.
+  it.each(["42", '"a string"', "true", "null", "[]"])(
+    "recovers from a valid-JSON but non-object storage value %s instead of crashing",
+    (corrupt) => {
+      const storage = fakeStorage();
+      storage.setItem("injection-range:results", corrupt);
+      storage.setItem("injection-range:streak", corrupt);
+
+      expect(getDailyResult(storage, "2026-07-09")).toBeNull();
+      expect(getStreak(storage)).toBe(0);
+      expect(() =>
+        recordResult(storage, "2026-07-09", { solved: true, hintUsed: false }),
+      ).not.toThrow();
+      expect(getStreak(storage)).toBe(1);
+    },
+  );
 });

@@ -19,7 +19,15 @@ function readJson<T>(storage: Pick<Storage, "getItem">, key: string, fallback: T
     if (raw === null) {
       return fallback;
     }
-    return JSON.parse(raw) as T;
+    const parsed: unknown = JSON.parse(raw);
+    // Both persisted values are keyed objects. A valid-JSON scalar or array
+    // (e.g. a stray `42` or `null` written by another tab or a corrupted
+    // entry) parses fine but would crash the property access below, so treat
+    // anything that isn't a plain object as absent.
+    if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return fallback;
+    }
+    return parsed as T;
   } catch {
     return fallback;
   }
