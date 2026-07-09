@@ -258,8 +258,13 @@ describe("initApp — daily persistence", () => {
     selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
     flagButton().click();
     blockButton().click();
+    expect(hintButton().disabled).toBe(true);
 
-    hintButton().click();
+    // The Hint button is disabled once the round is decided, so a real click
+    // can't reach the handler — but a stray/duplicate synthetic event (a
+    // queued double-tap, a testing tool bypassing `disabled`) still can.
+    // The handler's own decided-guard must stop it from being a no-op too.
+    hintButton().dispatchEvent(new Event("click", { bubbles: true }));
 
     expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: true, hintUsed: false });
   });
