@@ -1,23 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createSoundEngine } from "../src/audio";
-
-function fakeStorage(): Storage {
-  const store = new Map<string, string>();
-  return {
-    getItem: (key) => store.get(key) ?? null,
-    setItem: (key, value) => {
-      store.set(key, value);
-    },
-    removeItem: (key) => {
-      store.delete(key);
-    },
-    clear: () => store.clear(),
-    key: (index) => Array.from(store.keys())[index] ?? null,
-    get length() {
-      return store.size;
-    },
-  } satisfies Storage;
-}
+import { fakeStorage } from "./support/fake-storage";
 
 describe("createSoundEngine", () => {
   it("starts unmuted when storage has no prior preference", () => {
