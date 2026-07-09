@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { getDailyResult, getStreak, markHintUsed, previousDateKey, recordResult } from "../src/progress";
+import {
+  getDailyResult,
+  getStreak,
+  markHintUsed,
+  previousDateKey,
+  recordResult,
+} from "../src/progress";
 import { fakeStorage } from "./support/fake-storage";
 
 describe("previousDateKey", () => {
@@ -107,6 +113,8 @@ describe("getStreak", () => {
       key: () => null,
       length: 0,
     };
-    expect(() => recordResult(throwingStorage, "2026-07-09", { solved: true, hintUsed: false })).not.toThrow();
+    expect(() =>
+      recordResult(throwingStorage, "2026-07-09", { solved: true, hintUsed: false }),
+    ).not.toThrow();
   });
 });

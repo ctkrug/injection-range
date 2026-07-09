@@ -310,7 +310,9 @@ describe("initApp — daily persistence", () => {
 
   it("Copy Result copies the share summary via the Clipboard API when available", async () => {
     const writes: string[] = [];
-    Object.assign(navigator, { clipboard: { writeText: async (t: string) => void writes.push(t) } });
+    Object.assign(navigator, {
+      clipboard: { writeText: async (t: string) => void writes.push(t) },
+    });
     initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
     blockButton().click();
 

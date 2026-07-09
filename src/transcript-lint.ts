@@ -5,7 +5,11 @@
  * injection span. Story 4's real lint script runs this across the whole
  * pool at build time; today each transcript module calls it at load time.
  */
-export function findInjectionOffset(content: string, injectedText: string, transcriptId: string): number {
+export function findInjectionOffset(
+  content: string,
+  injectedText: string,
+  transcriptId: string,
+): number {
   const offset = content.indexOf(injectedText);
   if (offset === -1) {
     throw new Error(`transcript "${transcriptId}" injection marker not found in source content`);
