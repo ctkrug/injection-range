@@ -4,6 +4,13 @@ import { renderTranscript } from "./render";
 import { selectionToFlaggedSpan } from "./selection";
 import { isFlagCorrect, pendingMove, resolveDecision, type Outcome } from "./engine";
 import { createSoundEngine } from "./audio";
+import { formatDateKey } from "./daily";
+import { getDailyResult, getStreak, recordResult } from "./progress";
+
+export interface AppOptions {
+  storage?: Storage;
+  puzzleDateKey?: string;
+}
 
 const OUTCOME_BANNER: Record<Outcome, string> = {
   SECURE:
@@ -19,7 +26,10 @@ const OUTCOME_BANNER: Record<Outcome, string> = {
  * Owns all mutable game state in closure; call again (or use the Retry
  * button it renders) to start a fresh round.
  */
-export function initApp(root: HTMLElement, transcript: Transcript): void {
+export function initApp(root: HTMLElement, transcript: Transcript, options: AppOptions = {}): void {
+  const storage = options.storage ?? window.localStorage;
+  const puzzleDateKey = options.puzzleDateKey ?? formatDateKey(new Date());
+
   root.innerHTML = "";
   root.appendChild(buildShell(transcript));
 
@@ -33,6 +43,7 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
   const overlayMessage = root.querySelector<HTMLElement>(".outcome-message");
   const retryButton = root.querySelector<HTMLButtonElement>(".btn--retry");
   const muteButton = root.querySelector<HTMLButtonElement>(".btn--mute");
+  const streakCount = root.querySelector<HTMLElement>(".streak-count");
 
   if (
     !transcriptPane ||
@@ -44,7 +55,8 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
     !overlayBanner ||
     !overlayMessage ||
     !retryButton ||
-    !muteButton
+    !muteButton ||
+    !streakCount
   ) {
     throw new Error("app shell is missing an expected control element");
   }
@@ -55,8 +67,21 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
 
   const sound = createSoundEngine();
   syncMuteButton(muteButton, sound.isMuted());
+  syncStreakDisplay(streakCount, storage);
 
   renderTranscript(transcriptPane, transcript);
+
+  const todayResult = getDailyResult(storage, puzzleDateKey);
+  if (todayResult?.solved) {
+    decided = true;
+    flagButton.disabled = true;
+    allowButton.disabled = true;
+    blockButton.disabled = true;
+    overlayBanner.textContent = OUTCOME_BANNER.SECURE;
+    overlayMessage.textContent = "Already solved today's puzzle. Come back tomorrow for a new one.";
+    overlay.dataset.outcome = "SECURE";
+    overlay.hidden = false;
+  }
 
   function onSelectionChange(): void {
     if (decided) {
@@ -99,6 +124,9 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
     overlay!.dataset.outcome = result.outcome;
     overlay!.hidden = false;
     sound.playOutcome(result.outcome);
+
+    recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed: false });
+    syncStreakDisplay(streakCount!, storage);
   }
 
   function onMuteToggle(): void {
@@ -131,6 +159,10 @@ function syncMuteButton(button: HTMLButtonElement, muted: boolean): void {
   button.setAttribute("aria-pressed", String(muted));
 }
 
+function syncStreakDisplay(streakCount: HTMLElement, storage: Storage): void {
+  streakCount.textContent = String(getStreak(storage));
+}
+
 function buildShell(transcript: Transcript): DocumentFragment {
   const move = pendingMove(transcript);
   const template = document.createElement("template");
@@ -147,6 +179,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
           <h2>Mission brief</h2>
           <p>Select the text hiding the injected instruction, flag it, then decide: should
           the agent's next move be allowed or blocked?</p>
+          <p class="streak-line">Streak: <strong class="streak-count">0</strong> day(s)</p>
         </div>
         <div class="flag-controls">
           <button type="button" class="btn btn--flag" disabled>Flag Selection</button>
