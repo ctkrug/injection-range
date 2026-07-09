@@ -5,6 +5,7 @@ export default defineConfig({
   // (e.g. apps.charliekrug.com/injection-range), not just the domain root.
   base: "./",
   build: {
-    outDir: "dist",
+    // The publisher serves this directory at apps.charliekrug.com/injection-range.
+    outDir: "site",
   },
 });
