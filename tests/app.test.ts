@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { initApp } from "../src/app";
 import { sampleTranscript } from "../src/sample-transcript";
 import { fakeStorage } from "./support/fake-storage";
-import { getDailyResult } from "../src/progress";
+import { getDailyResult, getStreak } from "../src/progress";
 
 const { injection } = sampleTranscript;
 
@@ -155,6 +155,39 @@ describe("initApp", () => {
     blockButton().click();
 
     expect(overlay().dataset.outcome).toBe("BLOCKED_BLIND");
+  });
+
+  it("a stray second decision after Allow/Block is already resolved is a no-op", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    allowButton().click();
+    expect(overlay().dataset.outcome).toBe("LEAKED");
+
+    // Same rationale as the hint no-op test above: the buttons are disabled
+    // synchronously, so only a synthetic bypass can re-enter the handler.
+    blockButton().dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(overlay().dataset.outcome).toBe("LEAKED");
+    expect(getStreak(storage)).toBe(0);
+  });
+
+  it("a stray Flag click after the round is already decided is a no-op", () => {
+    initApp(root, sampleTranscript);
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    const feedbackAfterFirstFlag = root.querySelector(".flag-feedback")?.textContent;
+    blockButton().click();
+
+    flagButton().dispatchEvent(new Event("click", { bubbles: true }));
+
+    expect(root.querySelector(".flag-feedback")?.textContent).toBe(feedbackAfterFirstFlag);
+  });
+
+  it("clicking Copy Result before any decision is made does not throw", () => {
+    initApp(root, sampleTranscript);
+    const share = root.querySelector<HTMLButtonElement>(".btn--share")!;
+
+    expect(() => share.dispatchEvent(new Event("click", { bubbles: true }))).not.toThrow();
   });
 
   it("Retry resets the round: overlay hides, controls re-enable, marks clear", () => {
