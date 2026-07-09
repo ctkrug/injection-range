@@ -121,7 +121,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
       <section class="transcript-pane" aria-label="Agent transcript"></section>
       <aside class="control-panel">
         <div class="mission-brief">
-          <h2>${escapeHtml(transcript.title)}</h2>
+          <h2>Mission brief</h2>
           <p>Select the text hiding the injected instruction, flag it, then decide: should
           the agent's next move be allowed or blocked?</p>
         </div>
