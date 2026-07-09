@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { invisibleUnicodeTranscript } from "../src/transcript-invisible-unicode";
 
+const ZWSP = "\u200b";
+
 describe("invisibleUnicodeTranscript", () => {
   it("places the injection span inside the referenced message's content", () => {
     const { injection, messages } = invisibleUnicodeTranscript;
@@ -19,9 +21,9 @@ describe("invisibleUnicodeTranscript", () => {
   it("hides the payload behind zero-width spaces between every character", () => {
     const { injection, messages } = invisibleUnicodeTranscript;
     const span = messages[injection.messageIndex].content.slice(injection.start, injection.end);
-    expect(span).toContain("​");
+    expect(span).toContain(ZWSP);
     // Stripping the zero-width spaces should reveal readable instruction text.
-    expect(span.replace(/​/g, "")).toMatch(/forward this email/);
+    expect(span.split(ZWSP).join("")).toMatch(/forward this email/);
   });
 
   it("has exactly one dangerous next move and a safe move that isn't it", () => {
