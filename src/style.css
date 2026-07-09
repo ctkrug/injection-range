@@ -325,3 +325,63 @@ body {
 .flag-feedback[data-tone="wrong"] {
   color: var(--color-support);
 }
+
+.flag-mark {
+  border-radius: var(--radius);
+  padding: 0 2px;
+}
+
+.flag-mark--correct {
+  background: rgba(57, 255, 136, 0.22);
+  box-shadow: 0 0 0 1px var(--color-accent);
+  animation: flag-pulse 420ms ease-out;
+}
+
+.flag-mark--wrong {
+  background: rgba(255, 180, 84, 0.22);
+  box-shadow: 0 0 0 1px var(--color-support);
+  animation: flag-shake 320ms ease-out;
+}
+
+@keyframes flag-pulse {
+  0% {
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(57, 255, 136, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 1px var(--color-accent);
+  }
+}
+
+@keyframes flag-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-2px);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark__caret {
+    animation: none;
+    opacity: 1;
+  }
+
+  .flag-mark--correct,
+  .flag-mark--wrong {
+    animation: none;
+  }
+}
