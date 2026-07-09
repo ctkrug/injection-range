@@ -61,6 +61,21 @@ describe("createSoundEngine", () => {
     expect(() => engine.toggleMute()).not.toThrow();
   });
 
+  it("a storage that throws on read starts unmuted instead of crashing", () => {
+    const throwingStorage: Storage = {
+      getItem: () => {
+        throw new Error("storage disabled");
+      },
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+      key: () => null,
+      length: 0,
+    };
+    expect(() => createSoundEngine(throwingStorage)).not.toThrow();
+    expect(createSoundEngine(throwingStorage).isMuted()).toBe(false);
+  });
+
   describe("with a WebAudio-capable environment", () => {
     const originalAudioContext = window.AudioContext;
 
