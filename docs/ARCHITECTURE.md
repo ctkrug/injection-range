@@ -11,7 +11,8 @@ A static, client-side TypeScript app bundled with Vite. No backend, no build-tim
 | `render.ts`            | Pure DOM rendering: `renderTranscript(container, transcript)` turns a `Transcript` into role-tagged `<article>` elements. Message content is written via `textContent` only (never `innerHTML`), so an HTML-comment injection payload stays inert text instead of being parsed as markup. Each `.message__content` carries `data-message-index` so a DOM selection inside it can be mapped back to a character offset in `transcript.messages[i].content`. |
 | `selection.ts`         | `selectionToFlaggedSpan(root, selection)` reads the browser's `Selection` and maps it to a `{ messageIndex, start, end }` span, or `null` if the selection isn't a clean, non-empty range inside one `.message__content` element within `root`.                                                                                                                                                                                                            |
 | `engine.ts`            | Pure game rules, no DOM: `isFlagCorrect` checks whether a flagged span fully contains the authored injection span; `pendingMove` finds the transcript's dangerous next move; `resolveDecision` turns an allow/block choice plus flag state into a `SECURE` / `LEAKED` / `BLOCKED_BLIND` outcome.                                                                                                                                                           |
-| `app.ts`               | The DOM controller. `initApp(root, transcript)` builds the page shell (header, transcript pane, sidebar controls, outcome overlay), owns all round state in closure, and wires: `selectionchange` → enable "Flag Selection" → flag click validates + highlights the span → Allow/Block resolves via `engine.ts` → outcome overlay shows → Retry resets and re-renders.                                                                                     |
+| `audio.ts`             | `createSoundEngine(storage?)` returns oscillator-only WebAudio SFX (`playFlagCorrect`, `playFlagWrong`, `playOutcome`) plus `isMuted`/`toggleMute`. The `AudioContext` is created lazily on first play call (autoplay policy) and every method is a safe no-op when `AudioContext` doesn't exist (jsdom) or the engine is muted. Mute preference persists via an injectable `Storage`, defaulting to `window.localStorage`.                                |
+| `app.ts`               | The DOM controller. `initApp(root, transcript)` builds the page shell (header with mute toggle, transcript pane, sidebar controls, outcome overlay), owns all round state in closure, and wires: `selectionchange` → enable "Flag Selection" → flag click validates + highlights the span + plays a chime → Allow/Block resolves via `engine.ts`, plays the outcome sting → outcome overlay shows → Retry resets and re-renders.                           |
 | `main.ts`              | Entrypoint: mounts `initApp` on `#app` with `sampleTranscript`.                                                                                                                                                                                                                                                                                                                                                                                            |
 | `style.css`            | Terminal-mono design tokens and all styling — see `docs/DESIGN.md` for the direction these implement.                                                                                                                                                                                                                                                                                                                                                      |
 
@@ -74,9 +75,12 @@ asset path is relative — required because the site is served from a subpath
 
 ## Not yet built
 
-Everything here is Epic 1's wow moment (Story 1) plus Story 8's span-picking interaction. Not
-yet implemented: a transcript pool + deterministic daily picker (Story 2), `localStorage`
-persistence for streak/result (Story 3), additional injection techniques (Story 4), difficulty
-rotation (Story 5), hints (Story 6), synthesized WebAudio SFX + mute toggle (part of Story 7 —
-visual juice/animation is done, sound is not), run-stats on the SECURE screen and a copyable
-share string (Story 9/10), and the archive of past puzzles (Story 11).
+Everything here is Epic 1's wow moment (Story 1) plus Story 8's span-picking interaction, and a
+first pass at Story 7's SFX (flag correct/wrong, allow/block outcome, mute toggle). Not yet
+implemented: a transcript pool + deterministic daily picker (Story 2), `localStorage` persistence
+for streak/result (Story 3), additional injection techniques (Story 4), difficulty rotation
+(Story 5), hints (Story 6), the rest of Story 7's juice plan (char-by-char typing animation on
+new lines, the matrix-lite falling-glyph win celebration, and splitting the outcome sting into
+distinct allow-click/block-click/leak/win sounds per `docs/DESIGN.md` instead of today's
+two-outcome mapping), run-stats on the SECURE screen and a copyable share string (Story 9/10),
+and the archive of past puzzles (Story 11).
