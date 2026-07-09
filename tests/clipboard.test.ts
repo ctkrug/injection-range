@@ -26,4 +26,12 @@ describe("copyToClipboard", () => {
     });
     expect(ok).toBe(false);
   });
+
+  it("falls back to navigator.clipboard when no writer is passed at all", async () => {
+    // jsdom doesn't implement navigator.clipboard, so this resolves the
+    // real default-parameter expression and still exercises the "no
+    // clipboard available" path without throwing.
+    const ok = await copyToClipboard("hello");
+    expect(ok).toBe(false);
+  });
 });
