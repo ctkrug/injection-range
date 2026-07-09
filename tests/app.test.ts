@@ -252,6 +252,18 @@ describe("initApp — daily persistence", () => {
     expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: false, hintUsed: true });
   });
 
+  it("requesting a hint after the round is already decided is a no-op", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    hintButton().click();
+
+    expect(getDailyResult(storage, "2026-07-09")).toEqual({ solved: true, hintUsed: false });
+  });
+
   it("a SECURE solve without using the hint shows the no-hint badge", () => {
     initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
     selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
