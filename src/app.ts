@@ -3,6 +3,7 @@ import type { FlaggedSpan } from "./selection";
 import { renderTranscript } from "./render";
 import { selectionToFlaggedSpan } from "./selection";
 import { isFlagCorrect, pendingMove, resolveDecision, type Outcome } from "./engine";
+import { createSoundEngine } from "./audio";
 
 const OUTCOME_BANNER: Record<Outcome, string> = {
   SECURE:
@@ -31,6 +32,7 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
   const overlayBanner = root.querySelector<HTMLElement>(".outcome-banner");
   const overlayMessage = root.querySelector<HTMLElement>(".outcome-message");
   const retryButton = root.querySelector<HTMLButtonElement>(".btn--retry");
+  const muteButton = root.querySelector<HTMLButtonElement>(".btn--mute");
 
   if (
     !transcriptPane ||
@@ -41,7 +43,8 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
     !overlay ||
     !overlayBanner ||
     !overlayMessage ||
-    !retryButton
+    !retryButton ||
+    !muteButton
   ) {
     throw new Error("app shell is missing an expected control element");
   }
@@ -49,6 +52,9 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
   let candidateSpan: FlaggedSpan | null = null;
   let flaggedSpan: FlaggedSpan | null = null;
   let decided = false;
+
+  const sound = createSoundEngine();
+  syncMuteButton(muteButton, sound.isMuted());
 
   renderTranscript(transcriptPane, transcript);
 
@@ -72,6 +78,11 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
       : "Flagged — not quite. Keep looking.";
     flagFeedback!.dataset.tone = correct ? "correct" : "wrong";
     flagButton!.disabled = true;
+    if (correct) {
+      sound.playFlagCorrect();
+    } else {
+      sound.playFlagWrong();
+    }
   }
 
   function onDecision(decision: "allow" | "block"): void {
@@ -87,6 +98,11 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
     overlayMessage!.textContent = result.message;
     overlay!.dataset.outcome = result.outcome;
     overlay!.hidden = false;
+    sound.playOutcome(result.outcome);
+  }
+
+  function onMuteToggle(): void {
+    syncMuteButton(muteButton!, sound.toggleMute());
   }
 
   function onRetry(): void {
@@ -107,6 +123,12 @@ export function initApp(root: HTMLElement, transcript: Transcript): void {
   allowButton.addEventListener("click", () => onDecision("allow"));
   blockButton.addEventListener("click", () => onDecision("block"));
   retryButton.addEventListener("click", onRetry);
+  muteButton.addEventListener("click", onMuteToggle);
+}
+
+function syncMuteButton(button: HTMLButtonElement, muted: boolean): void {
+  button.textContent = muted ? "Sound: Off" : "Sound: On";
+  button.setAttribute("aria-pressed", String(muted));
 }
 
 function buildShell(transcript: Transcript): DocumentFragment {
@@ -114,6 +136,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
   const template = document.createElement("template");
   template.innerHTML = `
     <header class="app-header">
+      <button type="button" class="btn btn--mute" aria-pressed="false">Sound: On</button>
       <h1 class="wordmark">INJECTION_RANGE<span class="wordmark__caret" aria-hidden="true">█</span></h1>
       <p class="tagline">spot the injected instruction before the agent acts on it</p>
     </header>
