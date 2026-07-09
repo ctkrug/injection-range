@@ -66,6 +66,11 @@ is being asked to approve or block:
 - `tests/engine.test.ts`, `tests/selection.test.ts` — pure-logic unit tests, no DOM assumptions
   beyond jsdom's `Range`/`Selection` (selection tests must mount their DOM under
   `document.body` — jsdom refuses `Selection.addRange` on detached nodes).
+- `tests/engine.test.ts` and `tests/daily.test.ts` also carry `fast-check` property tests
+  alongside the example-based ones: `isFlagCorrect`'s containment invariants (any same-message
+  superset accepted, any edge-omission rejected, cross-message always rejected) and
+  `pickDailyTranscript`'s determinism/pool-membership, generated over arbitrary spans and
+  date-key strings rather than a handful of hand-picked cases.
 - `tests/render.test.ts` — content isolation, message-index tagging, HTML-comment inertness.
 - `tests/app.test.ts` — drives the full flag/allow/block loop through real `Range`/`Selection`
   objects and button clicks, asserting on rendered DOM state (button `disabled`, overlay
