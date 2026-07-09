@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { initApp } from "../src/app";
 import { sampleTranscript } from "../src/sample-transcript";
+import { fakeStorage } from "./support/fake-storage";
 
 const { injection } = sampleTranscript;
 
@@ -165,5 +166,64 @@ describe("initApp", () => {
     initApp(root, sampleTranscript);
 
     expect(muteButton().textContent).toBe("Sound: Off");
+  });
+});
+
+function streakCount(): string | null | undefined {
+  return root.querySelector(".streak-count")?.textContent;
+}
+
+describe("initApp — daily persistence", () => {
+  it("shows a streak of 0 with no prior history", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    expect(streakCount()).toBe("0");
+  });
+
+  it("increments the visible streak after a SECURE solve", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    expect(streakCount()).toBe("1");
+  });
+
+  it("does not increment the streak on a LEAKED or BLOCKED_BLIND outcome", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    blockButton().click();
+
+    expect(streakCount()).toBe("0");
+  });
+
+  it("reloading the same day after a solve shows the already-solved overlay and the prior streak", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+
+    expect(overlay().hidden).toBe(false);
+    expect(overlay().dataset.outcome).toBe("SECURE");
+    expect(allowButton().disabled).toBe(true);
+    expect(blockButton().disabled).toBe(true);
+    expect(streakCount()).toBe("1");
+  });
+
+  it("a new calendar day starts fresh even after yesterday's solve", () => {
+    const storage = fakeStorage();
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-09" });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    initApp(root, sampleTranscript, { storage, puzzleDateKey: "2026-07-10" });
+
+    expect(overlay().hidden).toBe(true);
+    expect(allowButton().disabled).toBe(false);
+    expect(blockButton().disabled).toBe(false);
   });
 });
