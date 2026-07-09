@@ -67,6 +67,7 @@ export function resolveDecision(
   return {
     outcome: "BLOCKED_BLIND",
     solved: false,
-    message: "Blocked the move, but the injection was never flagged. Find it before you block next time.",
+    message:
+      "Blocked the move, but the injection was never flagged. Find it before you block next time.",
   };
 }
