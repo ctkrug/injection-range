@@ -17,7 +17,7 @@ consequence, then let them retry.
 - Flagging the correct span, then clicking "Block", shows a SECURE outcome and marks the puzzle
   solved.
 
-### [ ] Story 2: Deterministic daily puzzle
+### [x] Story 2: Deterministic daily puzzle
 
 A date-based seed selects today's transcript from the pool so the puzzle changes once per day and
 is identical for every player.
