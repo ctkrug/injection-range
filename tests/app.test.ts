@@ -17,6 +17,7 @@ beforeEach(() => {
 afterEach(() => {
   document.getSelection()?.removeAllRanges();
   root.remove();
+  Reflect.deleteProperty(navigator, "clipboard");
 });
 
 function pane(): HTMLElement {
@@ -67,6 +68,22 @@ function hintButton(): HTMLButtonElement {
 
 function noHintBadge(): HTMLElement {
   return root.querySelector<HTMLElement>(".no-hint-badge")!;
+}
+
+function statsLine(): HTMLElement {
+  return root.querySelector<HTMLElement>(".stats-line")!;
+}
+
+function shareButton(): HTMLButtonElement {
+  return root.querySelector<HTMLButtonElement>(".btn--share")!;
+}
+
+function shareFeedback(): HTMLElement {
+  return root.querySelector<HTMLElement>(".share-feedback")!;
+}
+
+function shareFallback(): HTMLTextAreaElement {
+  return root.querySelector<HTMLTextAreaElement>(".share-fallback")!;
 }
 
 describe("initApp", () => {
@@ -273,6 +290,69 @@ describe("initApp — daily persistence", () => {
       `.message--hinted .message__content[data-message-index="${injection.messageIndex}"]`,
     );
     expect(hinted).not.toBeNull();
+  });
+
+  it("a SECURE decision shows the run stats and reveals the share button", () => {
+    let clock = 1_000_000;
+    initApp(root, sampleTranscript, {
+      storage: fakeStorage(),
+      puzzleDateKey: "2026-07-09",
+      now: () => clock,
+    });
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    clock += 7_000;
+    blockButton().click();
+
+    expect(statsLine().textContent).toBe("Time: 7s · Hints: 0 · Streak: 1");
+    expect(shareButton().hidden).toBe(false);
+  });
+
+  it("Copy Result copies the share summary via the Clipboard API when available", async () => {
+    const writes: string[] = [];
+    Object.assign(navigator, { clipboard: { writeText: async (t: string) => void writes.push(t) } });
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    blockButton().click();
+
+    shareButton().click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toContain("INJECTION_RANGE 2026-07-09");
+    expect(shareFeedback().textContent).toMatch(/copied/i);
+    expect(shareFallback().hidden).toBe(true);
+  });
+
+  it("Copy Result falls back to a manual-select text field without Clipboard API", async () => {
+    Object.assign(navigator, { clipboard: undefined });
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    blockButton().click();
+
+    shareButton().click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(shareFallback().hidden).toBe(false);
+    expect(shareFallback().value).toContain("INJECTION_RANGE 2026-07-09");
+    expect(shareFeedback().textContent).toMatch(/manually/i);
+  });
+
+  it("the share summary never contains the injection payload text", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    allowButton().click();
+
+    expect(statsLine().textContent).not.toContain("API_KEY");
+  });
+
+  it("Retry hides the share button and clears the stats line", () => {
+    initApp(root, sampleTranscript, { storage: fakeStorage(), puzzleDateKey: "2026-07-09" });
+    blockButton().click();
+    expect(shareButton().hidden).toBe(false);
+
+    root.querySelector<HTMLButtonElement>(".btn--retry")!.click();
+
+    expect(shareButton().hidden).toBe(true);
   });
 
   it("a new calendar day starts fresh even after yesterday's solve", () => {
