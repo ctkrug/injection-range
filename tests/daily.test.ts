@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import fc from "fast-check";
 import { formatDateKey, pickDailyTranscript } from "../src/daily";
 import { transcriptPool } from "../src/pool";
 import type { Transcript } from "../src/types";
@@ -62,5 +63,39 @@ describe("pickDailyTranscript", () => {
       ids.add(pickDailyTranscript(key, transcriptPool).id);
     }
     expect(ids.size).toBeGreaterThan(1);
+  });
+});
+
+describe("pickDailyTranscript — properties", () => {
+  const poolArb = fc
+    .integer({ min: 1, max: 20 })
+    .map((size) => Array.from({ length: size }, (_, i) => stubTranscript(`t${i}`)));
+
+  it("always returns a member of the pool, for any non-empty pool and any date-key string", () => {
+    fc.assert(
+      fc.property(fc.string(), poolArb, (dateKeyValue, pool) => {
+        const picked = pickDailyTranscript(dateKeyValue, pool);
+        expect(pool).toContain(picked);
+      }),
+    );
+  });
+
+  it("is deterministic: the same (dateKey, pool) pair always picks the same entry", () => {
+    fc.assert(
+      fc.property(fc.string(), poolArb, (dateKeyValue, pool) => {
+        const first = pickDailyTranscript(dateKeyValue, pool);
+        const second = pickDailyTranscript(dateKeyValue, pool);
+        expect(second).toBe(first);
+      }),
+    );
+  });
+
+  it("a pool of exactly one transcript is always picked, for any date key", () => {
+    fc.assert(
+      fc.property(fc.string(), (dateKeyValue) => {
+        const onlyEntry = stubTranscript("only");
+        expect(pickDailyTranscript(dateKeyValue, [onlyEntry])).toBe(onlyEntry);
+      }),
+    );
   });
 });
