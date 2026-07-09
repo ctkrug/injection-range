@@ -89,4 +89,33 @@ describe("selectionToFlaggedSpan", () => {
     const unrelatedRoot = document.createElement("div");
     expect(selectionToFlaggedSpan(unrelatedRoot, window.getSelection())).toBeNull();
   });
+
+  it("returns null for a selection dragged across two separate messages", () => {
+    const root = document.createElement("div");
+    const first = buildMessageContent(root, 0, "first message text");
+    buildMessageContent(root, 1, "second message text");
+    mount(root);
+
+    const range = document.createRange();
+    range.setStart(first, 3);
+    range.setEnd(root, root.childNodes.length);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+
+    expect(selectionToFlaggedSpan(root, selection)).toBeNull();
+  });
+
+  it("returns null when the message__content element has no data-message-index", () => {
+    const root = document.createElement("div");
+    const pre = document.createElement("pre");
+    pre.className = "message__content";
+    const textNode = document.createTextNode("no index here");
+    pre.appendChild(textNode);
+    root.appendChild(pre);
+    mount(root);
+    selectRange(textNode, 0, 4);
+
+    expect(selectionToFlaggedSpan(root, window.getSelection())).toBeNull();
+  });
 });
