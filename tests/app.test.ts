@@ -97,6 +97,23 @@ describe("initApp", () => {
     expect(overlay().hidden).toBe(true);
   });
 
+  it("renders a pending move label containing HTML as inert text, not markup", () => {
+    const withHtmlLabel = {
+      ...sampleTranscript,
+      nextMoves: sampleTranscript.nextMoves.map((move) =>
+        move.isDangerous
+          ? { ...move, label: `<img src=x onerror=alert(1)> & "quoted" <b>bold</b>` }
+          : move,
+      ),
+    };
+    initApp(root, withHtmlLabel);
+
+    const pendingMoveEl = root.querySelector(".pending-move")!;
+    expect(pendingMoveEl.textContent).toBe(`<img src=x onerror=alert(1)> & "quoted" <b>bold</b>`);
+    expect(pendingMoveEl.querySelector("img")).toBeNull();
+    expect(pendingMoveEl.querySelector("b")).toBeNull();
+  });
+
   it("enables Flag Selection once a valid span is selected", () => {
     initApp(root, sampleTranscript);
     selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
