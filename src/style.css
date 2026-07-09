@@ -518,6 +518,55 @@ body {
   display: none;
 }
 
+.stats-line {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 var(--space-2);
+}
+
+.share-controls {
+  margin: 0 0 var(--space-2);
+}
+
+.btn--share {
+  width: 100%;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn--share[hidden] {
+  display: none;
+}
+
+.btn--share:hover:not(:disabled) {
+  background: rgba(57, 255, 136, 0.12);
+  box-shadow: 0 0 12px rgba(57, 255, 136, 0.25);
+}
+
+.share-feedback {
+  min-height: 1.2em;
+  margin: var(--space-1) 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.share-fallback {
+  width: 100%;
+  margin-top: var(--space-1);
+  padding: var(--space-1);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  resize: none;
+}
+
+.share-fallback[hidden] {
+  display: none;
+}
+
 .outcome-overlay[data-outcome="SECURE"] .outcome-banner {
   color: var(--color-accent);
   text-shadow: 0 0 12px rgba(57, 255, 136, 0.45);
