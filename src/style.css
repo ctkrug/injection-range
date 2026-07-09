@@ -47,8 +47,30 @@ body {
 }
 
 .app-header {
+  position: relative;
   text-align: center;
   padding: var(--space-3) 0 var(--space-2);
+}
+
+.btn--mute {
+  position: absolute;
+  top: var(--space-3);
+  right: 0;
+  border-color: var(--color-text-muted);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.btn--mute[aria-pressed="true"] {
+  border-color: var(--color-support);
+  color: var(--color-support);
+}
+
+@media (max-width: 600px) {
+  .btn--mute {
+    position: static;
+    margin: 0 auto var(--space-2);
+  }
 }
 
 .wordmark {
