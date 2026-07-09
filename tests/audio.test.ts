@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createSoundEngine } from "../src/audio";
 import { fakeStorage } from "./support/fake-storage";
+import { FakeAudioContext } from "./support/fake-audio-context";
 
 describe("createSoundEngine", () => {
   it("starts unmuted when storage has no prior preference", () => {
@@ -58,5 +59,63 @@ describe("createSoundEngine", () => {
     };
     const engine = createSoundEngine(throwingStorage);
     expect(() => engine.toggleMute()).not.toThrow();
+  });
+
+  describe("with a WebAudio-capable environment", () => {
+    const originalAudioContext = window.AudioContext;
+
+    afterEach(() => {
+      window.AudioContext = originalAudioContext;
+    });
+
+    it("creates an oscillator+gain pair and starts/stops it for a play call", () => {
+      const fakeCtx = new FakeAudioContext();
+      window.AudioContext = vi.fn(() => fakeCtx) as unknown as typeof AudioContext;
+
+      const engine = createSoundEngine(fakeStorage());
+      engine.playAllowClick();
+
+      expect(fakeCtx.createOscillator).toHaveBeenCalledTimes(1);
+      expect(fakeCtx.createGain).toHaveBeenCalledTimes(1);
+      const osc = fakeCtx.createOscillator.mock.results[0]!.value;
+      expect(osc.start).toHaveBeenCalledWith(fakeCtx.currentTime);
+      expect(osc.stop).toHaveBeenCalled();
+    });
+
+    it("reuses the same AudioContext across multiple play calls", () => {
+      const ctorSpy = vi.fn(() => new FakeAudioContext());
+      window.AudioContext = ctorSpy as unknown as typeof AudioContext;
+
+      const engine = createSoundEngine(fakeStorage());
+      engine.playAllowClick();
+      engine.playBlockClick();
+
+      expect(ctorSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("resumes a suspended AudioContext on the next play call", () => {
+      const fakeCtx = new FakeAudioContext();
+      window.AudioContext = vi.fn(() => fakeCtx) as unknown as typeof AudioContext;
+
+      const engine = createSoundEngine(fakeStorage());
+      engine.playAllowClick();
+      fakeCtx.state = "suspended";
+      engine.playBlockClick();
+
+      expect(fakeCtx.resume).toHaveBeenCalledTimes(1);
+    });
+
+    it("falls back to webkitAudioContext when AudioContext is undefined", () => {
+      window.AudioContext = undefined as unknown as typeof AudioContext;
+      const fakeCtx = new FakeAudioContext();
+      const withWebkit = window as typeof window & { webkitAudioContext?: unknown };
+      withWebkit.webkitAudioContext = vi.fn(() => fakeCtx);
+
+      const engine = createSoundEngine(fakeStorage());
+      engine.playFlagCorrect();
+
+      expect(fakeCtx.createOscillator).toHaveBeenCalled();
+      delete withWebkit.webkitAudioContext;
+    });
   });
 });
