@@ -206,6 +206,28 @@ describe("initApp", () => {
     expect(root.querySelector(".flag-feedback")?.textContent).toBe("");
   });
 
+  it("Retry returns keyboard focus to the transcript pane instead of dropping it", () => {
+    initApp(root, sampleTranscript);
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    allowButton().click();
+
+    root.querySelector<HTMLButtonElement>(".btn--retry")!.click();
+
+    expect(document.activeElement).toBe(pane());
+  });
+
+  it("the outcome overlay is an announced, focus-managed dialog for assistive tech", () => {
+    initApp(root, sampleTranscript);
+    selectSpanInMessage(injection.messageIndex, injection.start, injection.end);
+    flagButton().click();
+    blockButton().click();
+
+    expect(overlay().getAttribute("role")).toBe("alertdialog");
+    expect(overlay().getAttribute("aria-modal")).toBe("true");
+    expect(document.activeElement).toBe(overlay());
+  });
+
   it("starts unmuted and toggles the mute button label + aria-pressed on click", () => {
     initApp(root, sampleTranscript);
 

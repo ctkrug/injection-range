@@ -110,6 +110,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     overlay.dataset.outcome = "SECURE";
     overlay.hidden = false;
     syncNoHintBadge(noHintBadge, "SECURE", hintUsed);
+    overlay.focus();
   }
 
   function onSelectionChange(): void {
@@ -159,6 +160,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     overlay!.dataset.outcome = result.outcome;
     overlay!.hidden = false;
     syncNoHintBadge(noHintBadge!, result.outcome, hintUsed);
+    overlay!.focus();
     sound.playOutcome(result.outcome);
 
     recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed });
@@ -229,6 +231,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     shareFallback!.hidden = true;
     renderTranscript(transcriptPane!, transcript);
     applyHintReveal(transcriptPane!, transcript, hintUsed);
+    transcriptPane!.focus();
   }
 
   document.addEventListener("selectionchange", onSelectionChange);
@@ -275,7 +278,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
       <p class="tagline">spot the injected instruction before the agent acts on it</p>
     </header>
     <main class="app-main">
-      <section class="transcript-pane" aria-label="Agent transcript"></section>
+      <section class="transcript-pane" aria-label="Agent transcript" tabindex="-1"></section>
       <aside class="control-panel">
         <div class="mission-brief">
           <h2>Mission brief</h2>
@@ -301,7 +304,7 @@ function buildShell(transcript: Transcript): DocumentFragment {
         </div>
       </aside>
     </main>
-    <div class="outcome-overlay" hidden>
+    <div class="outcome-overlay" hidden role="alertdialog" aria-modal="true" aria-label="Round result" tabindex="-1">
       <div class="outcome-card">
         <pre class="outcome-banner"></pre>
         <p class="outcome-message"></p>
