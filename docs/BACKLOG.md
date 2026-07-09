@@ -64,7 +64,7 @@ costs the player their "no-hint" badge.
 
 ## Epic 3 — Presentation and feel
 
-### [ ] Story 7: Design polish — implement docs/DESIGN.md
+### [x] Story 7: Design polish — implement docs/DESIGN.md
 
 Build out the terminal-mono direction end-to-end: tokens, type pairing, CRT scanline texture,
 blinking caret, synthesized SFX for keypress/allow/block/leak/win.
