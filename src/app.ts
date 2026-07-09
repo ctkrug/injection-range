@@ -6,10 +6,13 @@ import { isFlagCorrect, pendingMove, resolveDecision, type Outcome } from "./eng
 import { createSoundEngine } from "./audio";
 import { formatDateKey } from "./daily";
 import { getDailyResult, getStreak, markHintUsed, recordResult } from "./progress";
+import { buildShareSummary } from "./share";
+import { copyToClipboard } from "./clipboard";
 
 export interface AppOptions {
   storage?: Storage;
   puzzleDateKey?: string;
+  now?: () => number;
 }
 
 const OUTCOME_BANNER: Record<Outcome, string> = {
@@ -29,6 +32,7 @@ const OUTCOME_BANNER: Record<Outcome, string> = {
 export function initApp(root: HTMLElement, transcript: Transcript, options: AppOptions = {}): void {
   const storage = options.storage ?? window.localStorage;
   const puzzleDateKey = options.puzzleDateKey ?? formatDateKey(new Date());
+  const now = options.now ?? (() => Date.now());
 
   root.innerHTML = "";
   root.appendChild(buildShell(transcript));
@@ -47,6 +51,10 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   const hintButton = root.querySelector<HTMLButtonElement>(".btn--hint");
   const hintFeedback = root.querySelector<HTMLElement>(".hint-feedback");
   const noHintBadge = root.querySelector<HTMLElement>(".no-hint-badge");
+  const statsLine = root.querySelector<HTMLElement>(".stats-line");
+  const shareButton = root.querySelector<HTMLButtonElement>(".btn--share");
+  const shareFeedback = root.querySelector<HTMLElement>(".share-feedback");
+  const shareFallback = root.querySelector<HTMLTextAreaElement>(".share-fallback");
 
   if (
     !transcriptPane ||
@@ -62,7 +70,11 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     !streakCount ||
     !hintButton ||
     !hintFeedback ||
-    !noHintBadge
+    !noHintBadge ||
+    !statsLine ||
+    !shareButton ||
+    !shareFeedback ||
+    !shareFallback
   ) {
     throw new Error("app shell is missing an expected control element");
   }
@@ -70,6 +82,8 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   let candidateSpan: FlaggedSpan | null = null;
   let flaggedSpan: FlaggedSpan | null = null;
   let decided = false;
+  let roundStartedAt = now();
+  let lastShareSummary: string | null = null;
 
   const sound = createSoundEngine();
   syncMuteButton(muteButton, sound.isMuted());
@@ -144,6 +158,38 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
 
     recordResult(storage, puzzleDateKey, { solved: result.solved, hintUsed });
     syncStreakDisplay(streakCount!, storage);
+
+    const elapsedSeconds = Math.max(0, Math.round((now() - roundStartedAt) / 1000));
+    const streak = getStreak(storage);
+    statsLine!.textContent = `Time: ${elapsedSeconds}s · Hints: ${hintUsed ? "1" : "0"} · Streak: ${streak}`;
+    lastShareSummary = buildShareSummary({
+      dateKeyValue: puzzleDateKey,
+      outcome: result.outcome,
+      hintUsed,
+      elapsedSeconds,
+      streak,
+    });
+    shareButton!.hidden = false;
+    shareFeedback!.textContent = "";
+    shareFallback!.hidden = true;
+  }
+
+  function onShare(): void {
+    if (!lastShareSummary) {
+      return;
+    }
+    void copyToClipboard(lastShareSummary).then((copied) => {
+      if (copied) {
+        shareFeedback!.textContent = "Copied to clipboard.";
+        shareFallback!.hidden = true;
+        return;
+      }
+      shareFeedback!.textContent = "Clipboard unavailable — copy manually:";
+      shareFallback!.value = lastShareSummary ?? "";
+      shareFallback!.hidden = false;
+      shareFallback!.focus();
+      shareFallback!.select();
+    });
   }
 
   function onHint(): void {
@@ -165,12 +211,17 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
     candidateSpan = null;
     flaggedSpan = null;
     decided = false;
+    roundStartedAt = now();
+    lastShareSummary = null;
     overlay!.hidden = true;
     flagFeedback!.textContent = "";
     delete flagFeedback!.dataset.tone;
     flagButton!.disabled = true;
     allowButton!.disabled = false;
     blockButton!.disabled = false;
+    shareButton!.hidden = true;
+    shareFeedback!.textContent = "";
+    shareFallback!.hidden = true;
     renderTranscript(transcriptPane!, transcript);
     applyHintReveal(transcriptPane!, transcript, hintUsed);
   }
@@ -182,6 +233,7 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
   retryButton.addEventListener("click", onRetry);
   muteButton.addEventListener("click", onMuteToggle);
   hintButton.addEventListener("click", onHint);
+  shareButton.addEventListener("click", onShare);
 }
 
 function syncMuteButton(button: HTMLButtonElement, muted: boolean): void {
@@ -249,6 +301,12 @@ function buildShell(transcript: Transcript): DocumentFragment {
         <pre class="outcome-banner"></pre>
         <p class="outcome-message"></p>
         <p class="no-hint-badge" hidden>NO-HINT SOLVE</p>
+        <p class="stats-line"></p>
+        <div class="share-controls">
+          <button type="button" class="btn btn--share" hidden>Copy Result</button>
+          <p class="share-feedback" role="status" aria-live="polite"></p>
+          <textarea class="share-fallback" readonly hidden rows="2" aria-label="Result summary"></textarea>
+        </div>
         <button type="button" class="btn btn--retry">Retry</button>
       </div>
     </div>
