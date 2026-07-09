@@ -144,6 +144,11 @@ export function initApp(root: HTMLElement, transcript: Transcript, options: AppO
       return;
     }
     decided = true;
+    if (decision === "allow") {
+      sound.playAllowClick();
+    } else {
+      sound.playBlockClick();
+    }
     const result = resolveDecision(transcript, decision, flaggedSpan);
     flagButton!.disabled = true;
     allowButton!.disabled = true;
